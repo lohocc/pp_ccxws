@@ -52,7 +52,7 @@ export class OkexClient extends BasicClient {
     protected _pingInterval: NodeJS.Timeout;
 
     constructor({
-        wssPath = "wss://real.okex.com:8443/ws/v3",
+        wssPath = "wss://ws.okx.com:8443/ws/v5/public",
         watcherMs,
         sendThrottleMs = 20,
     }: OkexClientOptions = {}) {
@@ -96,8 +96,10 @@ export class OkexClient extends BasicClient {
      * the default is a spot market.
      */
     protected _marketArg(method: string, market: Market) {
-        const type = (market.type || "spot").toLowerCase();
-        return `${type.toLowerCase()}/${method}:${market.id}`;
+        return {
+            channel: method,
+            instId: market.id
+        };
     }
 
     /**
@@ -140,7 +142,7 @@ export class OkexClient extends BasicClient {
         this._sendMessage(
             JSON.stringify({
                 op: "subscribe",
-                args: [this._marketArg("ticker", market)],
+                args: [this._marketArg("tickers", market)],
             }),
         );
     }
@@ -149,7 +151,7 @@ export class OkexClient extends BasicClient {
         this._sendMessage(
             JSON.stringify({
                 op: "unsubscribe",
-                args: [this._marketArg("ticker", market)],
+                args: [this._marketArg("tickers", market)],
             }),
         );
     }
